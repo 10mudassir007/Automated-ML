@@ -6,9 +6,12 @@ import streamlit as st
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler, LabelEncoder
 
 # Remove unique columns
-def remove_unique(df, target_col):
+def remove_unique(df, target_col=None):
     df = df.copy()  
-    unique_cols = [col for col in df.columns if col != target_col and df[col].nunique() == len(df)]
+    if target_col is None:
+        unique_cols = [col for col in df.columns if df[col].nunique() == len(df)]
+    else:
+        unique_cols = [col for col in df.columns if col != target_col and df[col].nunique() == len(df)]
     df.drop(columns=unique_cols, inplace=True)
     return df
 
@@ -24,12 +27,13 @@ def handle_nulls(df, threshold=0.1):
     return df
 
 # Encode categorical features or drop them
-def encode_or_drop(df, target):
+def encode_or_drop(df, target=None):
     df = df.copy()
     encoders = {}
 
     object_cols = df.select_dtypes(include=['object']).columns.tolist()
-    object_cols = [col for col in object_cols if col != target]  
+    if target is not None:
+        object_cols = [col for col in object_cols if col != target]  
 
     for col in object_cols:
         unique_count = df[col].nunique()
@@ -42,12 +46,13 @@ def encode_or_drop(df, target):
     return df, encoders
 
 # Scaling numerical features
-def auto_scale(df, target):
+def auto_scale(df, target=None):
     df = df.copy()
     scalers = {}
 
     num_cols = df.select_dtypes(include=['number']).columns.tolist()
-    num_cols = [col for col in num_cols if col != target]
+    if target is not None:
+        num_cols = [col for col in num_cols if col != target]
 
     for col in num_cols:
         col_data = df[col].dropna()
@@ -114,6 +119,51 @@ def feature_engineering(df, target_col):
             feature_pairs.append((col1, col2))
 
     return df, feature_pairs
+
+def feature_engineering(df, target_col=None):
+    df = df.copy()
+    feature_pairs = []
+
+    if target_col and target_col in df.columns:
+        correlation_matrix = df.corr()[target_col]
+        strong_correlations = correlation_matrix[abs(correlation_matrix) > 0.4]
+
+        if len(strong_correlations) <= 2:
+            strong_correlations = correlation_matrix[abs(correlation_matrix) > 0.2]
+
+        strong_correlations = strong_correlations.drop(target_col, errors="ignore")
+        correlated_features = strong_correlations.index.tolist()
+    else:
+        correlation_matrix = df.corr()
+        correlated_features = correlation_matrix.columns.tolist()
+
+    new_features = 0
+    for i in range(len(correlated_features)):
+        for j in range(i + 1, len(correlated_features)):
+            if new_features >= 3:  
+                return df, feature_pairs
+
+            col1, col2 = correlated_features[i], correlated_features[j]
+
+            df[col1] = df[col1] + 1e-5
+            df[col2] = df[col2] + 1e-5
+
+            new_col_name = f"{col1}_div_{col2}"
+            df[new_col_name] = df[col1] / (df[col2] + 1)
+
+            min_val = df[new_col_name].min()
+            max_val = df[new_col_name].max()
+
+            if max_val != min_val:  
+                df[new_col_name] = 2 * ((df[new_col_name] - min_val) / (max_val - min_val)) - 1
+            else:
+                df[new_col_name] = 0  
+
+            new_features += 1
+            feature_pairs.append((col1, col2))
+
+    return df, feature_pairs
+
 # Save the processing artifacts
 def save_processing_artifacts(feature_pairs, encoders, scalers, filename="processing_artifacts.json"):
     artifacts = {
@@ -131,7 +181,7 @@ def save_processing_artifacts(feature_pairs, encoders, scalers, filename="proces
         pickle.dump(scalers, f)
 
 # Process the dataframe
-def process_df(df, target):
+def process_df(df, target=None):
     df = df.copy()
     
     df = remove_unique(df, target)
@@ -150,6 +200,6 @@ st.write("Original Data:")
 st.write(df)
 
 # Processed Data
-df_processed = process_df(df, df.columns[-1])
+df_processed = process_df(df)
 st.write("Processed Data:")
 st.write(df_processed)
