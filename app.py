@@ -4,18 +4,23 @@ import pickle
 import json
 import streamlit as st
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler, LabelEncoder
+from sklearn.model_selection import train_test_split
+from xgboost import XGBClassifier, XGBRegressor
+from catboost import CatBoostClassifier, CatBoostRegressor
+from lightgbm import LGBMClassifier, LGBMRegressor
+from sklearn.metrics import r2_score, accuracy_score
 
-# Remove unique columns
 def remove_unique(df, target_col=None):
     df = df.copy()  
     if target_col is None:
         unique_cols = [col for col in df.columns if df[col].nunique() == len(df)]
     else:
         unique_cols = [col for col in df.columns if col != target_col and df[col].nunique() == len(df)]
+    if len(df.columns) - len(unique_cols) < 5:
+        return df
     df.drop(columns=unique_cols, inplace=True)
     return df
 
-# Handle null values
 def handle_nulls(df, threshold=0.1):
     df = df.copy()
     total_missing = df.isnull().sum().sum() / df.size
@@ -26,7 +31,6 @@ def handle_nulls(df, threshold=0.1):
         df = df.fillna(df.median(numeric_only=True))
     return df
 
-# Encode categorical features or drop them
 def encode_or_drop(df, target=None):
     df = df.copy()
     encoders = {}
@@ -45,7 +49,6 @@ def encode_or_drop(df, target=None):
 
     return df, encoders
 
-# Scaling numerical features
 def auto_scale(df, target=None):
     df = df.copy()
     scalers = {}
@@ -81,44 +84,7 @@ def auto_scale(df, target=None):
     return df, scalers
 
 
-def feature_engineering(df, target_col):
-    df = df.copy()
-    feature_pairs = []
-    target_correlation = df.corr()[target_col]
 
-    strong_correlations = target_correlation[abs(target_correlation) > 0.4]
-    if len(strong_correlations) <= 2:
-        strong_correlations = target_correlation[abs(target_correlation) > 0.2]
-
-    strong_correlations = strong_correlations.drop(target_col, errors="ignore")
-    correlated_features = strong_correlations.index.tolist()
-
-    new_features = 0
-    for i in range(len(correlated_features)):
-        for j in range(i + 1, len(correlated_features)):
-            if new_features >= 3: 
-                return df, feature_pairs
-
-            col1, col2 = correlated_features[i], correlated_features[j]
-
-            df[col1] = df[col1] + 1e-5
-            df[col2] = df[col2] + 1e-5
-
-            new_col_name = f"{col1}_div_{col2}"
-            df[new_col_name] = df[col1] / (df[col2] + 1)
-
-            min_val = df[new_col_name].min()
-            max_val = df[new_col_name].max()
-
-            if max_val != min_val:  
-                df[new_col_name] = 2 * ((df[new_col_name] - min_val) / (max_val - min_val)) - 1
-            else:
-                df[new_col_name] = 0  
-
-            new_features += 1
-            feature_pairs.append((col1, col2))
-
-    return df, feature_pairs
 
 def feature_engineering(df, target_col=None):
     df = df.copy()
@@ -145,11 +111,8 @@ def feature_engineering(df, target_col=None):
 
             col1, col2 = correlated_features[i], correlated_features[j]
 
-            df[col1] = df[col1] + 1e-5
-            df[col2] = df[col2] + 1e-5
-
             new_col_name = f"{col1}_div_{col2}"
-            df[new_col_name] = df[col1] / (df[col2] + 1)
+            df[new_col_name] = (df[col1] + 1e-5) / ((df[col2] + 1e-5) + 1)
 
             min_val = df[new_col_name].min()
             max_val = df[new_col_name].max()
@@ -164,7 +127,6 @@ def feature_engineering(df, target_col=None):
 
     return df, feature_pairs
 
-# Save the processing artifacts
 def save_processing_artifacts(feature_pairs, encoders, scalers, filename="processing_artifacts.json"):
     artifacts = {
         "feature_pairs": feature_pairs,
@@ -172,34 +134,86 @@ def save_processing_artifacts(feature_pairs, encoders, scalers, filename="proces
         "scalers": list(scalers.keys())
     }
     
-    # Save as JSON
     with open(filename, "w") as f:
         json.dump(artifacts, f)
 
-    # Save scalers separately using Pickle
     with open("scalers.pkl", "wb") as f:
         pickle.dump(scalers, f)
 
-# Process the dataframe
+def seperate_data(df,target=None):
+    if target:
+        X = df.drop(target,axis=1)
+        y = df[target]
+        return train_test_split(X,y,test_size=0.2,random_state=42)
+    else:
+        return train_test_split(df,test_size=0.2,random_state=42)
+
 def process_df(df, target=None):
     df = df.copy()
-    
     df = remove_unique(df, target)
     df = handle_nulls(df)
     df, scalers = auto_scale(df, target)
     df, encoders = encode_or_drop(df, target)
     df, feature_pairs = feature_engineering(df, target_col=target)
-
     save_processing_artifacts(feature_pairs, encoders, scalers)
-
     return df
 
-# Streamlit App
-df = pd.read_csv("Clean_Dataset.csv")
-st.write("Original Data:")
+def training_s(df, target):
+    X_train, X_test, y_train, y_test = seperate_data(df, target)
+    is_regression = df[target].nunique() > int(df.shape[0] * 0.01)
+    models = {}
+    if is_regression:
+        models = {
+            "XGBRegressor": XGBRegressor(),
+            "CatBoostRegressor": CatBoostRegressor(verbose=0),
+            "LGBMRegressor": LGBMRegressor(verbose=-1)
+        }
+        scoring_func = r2_score  
+    else:
+        models = {
+            "XGBClassifier": XGBClassifier(),
+            "CatBoostClassifier": CatBoostClassifier(verbose=0),
+            "LGBMClassifier": LGBMClassifier(verbose=-1)
+        }
+        scoring_func = accuracy_score 
+
+    best_model = None
+    best_score = float('-inf')
+    for _, model in models.items():
+        model.fit(X_train.to_numpy(), y_train.to_numpy())
+        train_score = scoring_func(y_train.to_numpy(), model.predict(X_train.to_numpy()))
+        test_score = scoring_func(y_test.to_numpy(), model.predict(X_test.to_numpy()))
+        mean_score = (train_score + test_score) / 2  
+
+        if mean_score > best_score:
+            best_score = mean_score
+            best_model = model
+    return best_model,(best_model.score(X_train.to_numpy(),y_train.to_numpy()), best_model.score(X_test.to_numpy(),y_test.to_numpy()))
+
+df = pd.read_csv("Ecommerce Customers")
+st.write("Data:")
 st.write(df)
 
-# Processed Data
-df_processed = process_df(df)
-st.write("Processed Data:")
+with st.spinner("Processing Data"):
+    df_processed = process_df(df,df.columns[-1])
 st.write(df_processed)
+with st.spinner("Training the model"):
+    model,scores = training_s(df_processed,df.columns[-1])
+st.write(f"##### Train Score: {scores[0]}",unsafe_allow_html=True)
+st.write(f"##### Test Score: {scores[1]}",unsafe_allow_html=True)
+
+
+
+if "feature_inputs" not in st.session_state:
+    st.session_state.feature_inputs = {}
+    
+with st.form("input_form"):
+    for col in df.columns:
+        st.session_state.feature_inputs[col] = st.text_input(
+            f"Enter {col}",
+            value=st.session_state.feature_inputs.get(col, "")
+        )
+    submitted = st.form_submit_button("Submit")
+
+if submitted:
+    st.write("User Input:", st.session_state.feature_inputs)
