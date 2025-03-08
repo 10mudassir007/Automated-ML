@@ -239,7 +239,7 @@ else:
 
 st.write(f"##### Train Score: {scores[0]}", unsafe_allow_html=True)
 st.write(f"##### Test Score: {scores[1]}", unsafe_allow_html=True)
-
+st.write(df_processed)
 st.write(df.iloc[0])
 st.write(df_processed.iloc[0])
 st.write(model.feature_names_)
