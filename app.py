@@ -282,10 +282,6 @@ else:
 
 st.write("Data:")
 st.write(df)
-st.write(df_processed)
-st.write(df.iloc[0])
-st.write(df_processed.iloc[0])
-st.write(model.feature_names_)
 st.write(f"##### Train Score: {scores[0]}", unsafe_allow_html=True)
 st.write(f"##### Test Score: {scores[1]}", unsafe_allow_html=True)
 
@@ -308,6 +304,4 @@ if submitted:
     user_df = pd.DataFrame([user_input]) 
     feature_pairs, encoders, scalers = load_processing_artifacts()
     processed_input = process_user_input(user_df, encoders, scalers, feature_pairs)
-    st.write(processed_input)
-    st.write(processed_input.shape)
-    st.write(model.predict(processed_input.to_numpy().flatten()))
+    st.write(f"Predicted Value: {model.predict(processed_input.to_numpy().flatten())}")
