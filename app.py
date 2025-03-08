@@ -300,11 +300,11 @@ with st.form("input_form"):
             f"Enter {col}",
             value=st.session_state.feature_inputs.get(col, "")
         )
-    submitted = st.form_submit_button("Submit")
+    submitted = st.form_submit_button("Predict")
 
 if submitted:
     user_input = {col: float(value) for col, value in st.session_state.feature_inputs.items()}
     user_df = pd.DataFrame([user_input]) 
     feature_pairs, encoders, scalers = load_processing_artifacts()
     processed_input = process_user_input(user_df, encoders, scalers, feature_pairs)
-    st.write(model.predict(processed_input))
+    st.write(model.predict([processed_input]))
