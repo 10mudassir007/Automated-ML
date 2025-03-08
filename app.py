@@ -247,7 +247,7 @@ if "feature_inputs" not in st.session_state:
 
 with st.form("input_form"):
     
-    for col in df.columns:
+    for col in df_processed.columns:
         if col == df.columns[-1]:
             break
         st.session_state.feature_inputs[col] = st.text_input(
