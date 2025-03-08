@@ -302,9 +302,17 @@ if submitted:
     st.write(model.get_booster().feature_names)
     #st.write(model.predict(df_processed.iloc[0]))
     prediction = model.predict(processed_input.to_numpy())
-    try:
-        prediction = prediction[0]
-    except:
-        prediction = round(prediction,2)
-    st.write(f"#### Predicted Value: {prediction}",unsafe_allow_html=True)
-    
+    target_col = df.columns[-1]
+    is_classification = target_col in encoders
+
+    if is_classification:
+        label_encoder = encoders[target_col]  # Get encoder for target
+        prediction = label_encoder.inverse_transform([int(prediction[0])])[0]  # Convert number to label
+    else:
+        try:
+            prediction = round(float(prediction[0]), 2)
+        except:
+            prediction = prediction
+
+    # Show prediction
+    st.write(f"#### Predicted Value: {prediction}", unsafe_allow_html=True)
