@@ -293,11 +293,7 @@ if submitted:
     processed_input = process_user_input(user_df, encoders, scalers, feature_pairs)
     st.write(processed_input)
     st.write(processed_input.shape)
-    try:
-        st.write(processed_input.flatten())
-        st.write(processed_input.flatten().shape)
-    except:
-        st.write(processed_input.to_numpy().flatten())
-        st.write(processed_input.to_numpy().flatten().shape)
-    #st.write(f"#### Predicted Value: {round(model.predict(processed_input.to_numpy().flatten()),2)}",unsafe_allow_html=True)
+    st.write(processed_input.flatten())
+    st.write(processed_input.flatten().shape)
+    st.write(f"#### Predicted Value: {round(model.predict(processed_input.flatten()),2)}",unsafe_allow_html=True)
     
