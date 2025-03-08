@@ -1,6 +1,6 @@
 import numpy as np
 import modin.pandas as pd
-improt fireducks.pandas as pd
+import fireducks.pandas as pd
 import pickle
 import json
 import streamlit as st
