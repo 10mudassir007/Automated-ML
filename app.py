@@ -227,15 +227,14 @@ def process_user_input(user_df, encoders, scalers, feature_pairs):
         min_val, max_val = user_df[new_col_name].min(), user_df[new_col_name].max()
         if max_val != min_val:
             user_df[new_col_name] = 2 * ((user_df[new_col_name] - min_val) / (max_val - min_val)) - 1
-        else:
-            user_df[new_col_name] = 0  
+        # else:
+        #     user_df[new_col_name] = 0  
 
     return user_df
 
 
 df = pd.read_csv("Ecommerce Customers")
-st.write("Data:")
-st.write(df)
+
 
 # with st.spinner("Processing Data"):
 #     df_processed = process_df(df,df.columns[-1])
@@ -279,12 +278,16 @@ else:
     scores = st.session_state.train_scores
     df_processed = st.session_state.df_processed
 
-st.write(f"##### Train Score: {scores[0]}", unsafe_allow_html=True)
-st.write(f"##### Test Score: {scores[1]}", unsafe_allow_html=True)
+
+st.write("Data:")
+st.write(df)
 st.write(df_processed)
 st.write(df.iloc[0])
 st.write(df_processed.iloc[0])
 st.write(model.feature_names_)
+st.write(f"##### Train Score: {scores[0]}", unsafe_allow_html=True)
+st.write(f"##### Test Score: {scores[1]}", unsafe_allow_html=True)
+
 if "feature_inputs" not in st.session_state:
     st.session_state.feature_inputs = {}
 
