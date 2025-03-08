@@ -304,7 +304,8 @@ if submitted:
 
     if is_classification:
         
-        st.write("aa",prediction) 
+        label_encoder = encoders[target_col] 
+        prediction = label_encoder.inverse_transform([int(prediction[0])])[0]
     else:
         try:
             label_encoder = encoders[target_col] 
