@@ -295,5 +295,5 @@ if submitted:
     st.write(processed_input.shape)
     st.write(processed_input.to_numpy().flatten())
     st.write(processed_input.to_numpy().flatten().shape)
-    st.write(f"#### Predicted Value: {round(model.predict(processed_input.flatten()),2)}",unsafe_allow_html=True)
+    st.write(f"#### Predicted Value: {round(model.predict(processed_input.to_numpy().flatten()),2)}",unsafe_allow_html=True)
     
