@@ -1,0 +1,9 @@
+numpy
+pandas
+fireducks
+modin[all]
+ray[default]
+scikit-learn
+xgboost
+catboost
+lightgbm
