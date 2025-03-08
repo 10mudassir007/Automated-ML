@@ -227,8 +227,8 @@ def process_user_input(user_df, encoders, scalers, feature_pairs):
         min_val, max_val = user_df[new_col_name].min(), user_df[new_col_name].max()
         if max_val != min_val:
             user_df[new_col_name] = 2 * ((user_df[new_col_name] - min_val) / (max_val - min_val)) - 1
-        # else:
-        #     user_df[new_col_name] = 0  
+        else:
+            user_df[new_col_name] =  int(str(1 + (0 * len(str(user_df[new_col_name])))))
 
     return user_df
 
@@ -291,5 +291,6 @@ if submitted:
     user_df = pd.DataFrame([user_input]) 
     feature_pairs, encoders, scalers = load_processing_artifacts()
     processed_input = process_user_input(user_df, encoders, scalers, feature_pairs)
-    st.write(f"#### Predicted Value: {round(model.predict(processed_input.to_numpy().flatten()),2)}",unsafe_allow_html=True)
+    st.write(processed_input)
+    #st.write(f"#### Predicted Value: {round(model.predict(processed_input.to_numpy().flatten()),2)}",unsafe_allow_html=True)
     
