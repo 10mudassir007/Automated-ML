@@ -298,4 +298,5 @@ if submitted:
     st.write(df.iloc[0])
     st.write(model)
     st.write(model.feature_names_)
-    #st.write(f"#### Predicted Value: {round(model.predict(processed_input.to_numpy(
+    #st.write(f"#### Predicted Value: {round(model.predict(processed_input.to_numpy().flatten()),2)}",unsafe_allow_html=True)
+    
