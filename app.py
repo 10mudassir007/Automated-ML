@@ -251,7 +251,7 @@ if df.shape[1] < 2:
     st.stop()
 
 st.write("Data:")
-st.write(df[:1000])
+st.write(df)
 
 with st.spinner("Processing Data"):
     df_processed,scalers,encoders,feature_pairs = process_df(df, df.columns[-1])
