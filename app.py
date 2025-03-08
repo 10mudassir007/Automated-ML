@@ -157,7 +157,7 @@ def process_df(df, target=None):
     df, encoders = encode_or_drop(df, target)
     df, feature_pairs = feature_engineering(df, target_col=target)
     save_processing_artifacts(feature_pairs, encoders, scalers)
-    return df
+    return df,scalers,encoders,feature_pairs
 
 def training_s(df, target):
     X_train, X_test, y_train, y_test = seperate_data(df, target)
@@ -190,6 +190,48 @@ def training_s(df, target):
             best_score = mean_score
             best_model = model
     return best_model,(best_model.score(X_train.to_numpy(),y_train.to_numpy()), best_model.score(X_test.to_numpy(),y_test.to_numpy()))
+
+def load_processing_artifacts(artifacts_file="processing_artifacts.json", scalers_file="scalers.pkl"):
+    with open(artifacts_file, "r") as f:
+        artifacts = json.load(f)
+    
+    with open(scalers_file, "rb") as f:
+        scalers = pickle.load(f)
+
+    encoders = {
+        col: LabelEncoder().fit(classes)
+        for col, classes in artifacts["encoders"].items()
+    }
+
+    return artifacts["feature_pairs"], encoders, scalers
+
+def process_user_input(user_df, encoders, scalers, feature_pairs):
+    user_df = user_df.copy()
+
+    # Apply Encoding
+    for col, encoder in encoders.items():
+        if col in user_df:
+            user_df[col] = encoder.transform(user_df[col])
+
+    # Apply Scaling
+    for col, scaler in scalers.items():
+        if col in user_df:
+            user_df[col] = scaler.transform(user_df[[col]])
+
+    # Apply Feature Engineering
+    for col1, col2 in feature_pairs:
+        new_col_name = f"{col1}_div_{col2}"
+        user_df[new_col_name] = (user_df[col1] + 1e-5) / ((user_df[col2] + 1e-5) + 1)
+        
+        # Normalize
+        min_val, max_val = user_df[new_col_name].min(), user_df[new_col_name].max()
+        if max_val != min_val:
+            user_df[new_col_name] = 2 * ((user_df[new_col_name] - min_val) / (max_val - min_val)) - 1
+        else:
+            user_df[new_col_name] = 0  
+
+    return user_df
+
 
 df = pd.read_csv("Ecommerce Customers")
 st.write("Data:")
@@ -224,7 +266,7 @@ st.write(df)
 # Only train the model if it's not already stored
 if "trained_model" not in st.session_state or "train_scores" not in st.session_state:
     with st.spinner("Processing Data"):
-        df_processed = process_df(df, df.columns[-1])
+        df_processed,scalers,encoders,feature_pairs = process_df(df, df.columns[-1])
 
     with st.spinner("Training the model"):
         model, scores = training_s(df_processed, df.columns[-1])
@@ -260,5 +302,6 @@ with st.form("input_form"):
 if submitted:
     user_input = {col: float(value) for col, value in st.session_state.feature_inputs.items()}
     user_df = pd.DataFrame([user_input]) 
-    prediction = model.predict(user_df.to_numpy())[0]  
-    st.write(f"### Prediction: {prediction}")
+    feature_pairs, encoders, scalers = load_processing_artifacts()
+    processed_input = process_user_input(user_df, encoders, scalers, feature_pairs)
+    st.write(processed_input)
