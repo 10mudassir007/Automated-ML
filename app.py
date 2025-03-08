@@ -246,7 +246,10 @@ if "feature_inputs" not in st.session_state:
     st.session_state.feature_inputs = {}
 
 with st.form("input_form"):
+    
     for col in df.columns:
+        if col == df.columns[-1]:
+            break
         st.session_state.feature_inputs[col] = st.text_input(
             f"Enter {col}",
             value=st.session_state.feature_inputs.get(col, "")
@@ -255,6 +258,6 @@ with st.form("input_form"):
 
 if submitted:
     user_input = {col: float(value) for col, value in st.session_state.feature_inputs.items()}
-    user_df = pd.DataFrame([user_input])  # Convert to DataFrame
-    prediction = model.predict(user_df.to_numpy())[0]  # Make prediction
+    user_df = pd.DataFrame([user_input]) 
+    prediction = model.predict(user_df.to_numpy())[0]  
     st.write(f"### Prediction: {prediction}")
