@@ -305,5 +305,5 @@ if submitted:
         prediction = prediction[0]
     except:
         prediction = round(prediction,2)
-    st.write(f"#### Predicted Value: {prediction)}",unsafe_allow_html=True)
+    st.write(f"#### Predicted Value: {prediction}",unsafe_allow_html=True)
     
