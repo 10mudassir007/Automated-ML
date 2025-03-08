@@ -250,10 +250,11 @@ if df.shape[1] < 2:
     st.error("Dataset must have at least one feature and a target column.")
     st.stop()
 
-if "trained_model" not in st.session_state or "train_scores" not in st.session_state:
-    with st.spinner("Processing Data"):
+with st.spinner("Processing Data"):
         df_processed,scalers,encoders,feature_pairs = process_df(df, df.columns[-1])
     st.success("Data Processed")
+if "trained_model" not in st.session_state or "train_scores" not in st.session_state:
+    
     with st.spinner("Training the model"):
         model, scores = training_s(df_processed, df.columns[-1])
     st.success("Model Trained ")
