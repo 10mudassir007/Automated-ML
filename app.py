@@ -235,34 +235,6 @@ def process_user_input(user_df, encoders, scalers, feature_pairs):
 
 df = pd.read_csv("Ecommerce Customers")
 
-
-# with st.spinner("Processing Data"):
-#     df_processed = process_df(df,df.columns[-1])
-# st.write(df_processed)
-# with st.spinner("Training the model"):
-#     model,scores = training_s(df_processed,df.columns[-1])
-# st.write(f"##### Train Score: {scores[0]}",unsafe_allow_html=True)
-# st.write(f"##### Test Score: {scores[1]}",unsafe_allow_html=True)
-
-
-# st.write(df.iloc[0])
-# if "feature_inputs" not in st.session_state:
-#     st.session_state.feature_inputs = {}
-    
-# with st.form("input_form"):
-#     for col in df_processed.columns:
-#         st.session_state.feature_inputs[col] = st.text_input(
-#             f"Enter {col}",
-#             value=st.session_state.feature_inputs.get(col, "")
-#         )
-#         if col == df.columns[-1]:
-#             break
-#     submitted = st.form_submit_button("Submit")
-
-# if submitted:
-#     st.write("User Input:", st.session_state.feature_inputs)
-
-# Only train the model if it's not already stored
 if "trained_model" not in st.session_state or "train_scores" not in st.session_state:
     with st.spinner("Processing Data"):
         df_processed,scalers,encoders,feature_pairs = process_df(df, df.columns[-1])
@@ -304,4 +276,4 @@ if submitted:
     user_df = pd.DataFrame([user_input]) 
     feature_pairs, encoders, scalers = load_processing_artifacts()
     processed_input = process_user_input(user_df, encoders, scalers, feature_pairs)
-    st.write(f"Predicted Value: {model.predict(processed_input.to_numpy().flatten())}")
+    st.write(f"#### Predicted Value: {round(model.predict(processed_input.to_numpy().flatten()),2)}",unsafe_allow_html=True)
