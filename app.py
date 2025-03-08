@@ -300,5 +300,10 @@ if submitted:
     st.write(df_processed.columns)
     st.write(model.get_booster().feature_names)
     #st.write(model.predict(df_processed.iloc[0]))
-    st.write(f"#### Predicted Value: {model.predict(processed_input.to_numpy())}",unsafe_allow_html=True)
+    prediction = model.predict(processed_input.to_numpy())
+    try:
+        prediction = prediction[0]
+    except:
+        prediction = round(prediction,2)
+    st.write(f"#### Predicted Value: {prediction)}",unsafe_allow_html=True)
     
