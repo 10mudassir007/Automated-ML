@@ -209,11 +209,13 @@ if "feature_inputs" not in st.session_state:
     st.session_state.feature_inputs = {}
     
 with st.form("input_form"):
-    for col in df.columns:
+    for col in df_processed.columns:
         st.session_state.feature_inputs[col] = st.text_input(
             f"Enter {col}",
             value=st.session_state.feature_inputs.get(col, "")
         )
+        if col == df.columns[-1]:
+            break
     submitted = st.form_submit_button("Submit")
 
 if submitted:
