@@ -250,6 +250,9 @@ if df.shape[1] < 2:
     st.error("Dataset must have at least one feature and a target column.")
     st.stop()
 
+st.write("Data:")
+st.write(df)
+
 with st.spinner("Processing Data"):
     df_processed,scalers,encoders,feature_pairs = process_df(df, df.columns[-1])
     st.success("Data Processed")
@@ -267,9 +270,6 @@ else:
     scores = st.session_state.train_scores
     df_processed = st.session_state.df_processed
 
-
-st.write("Data:")
-st.write(df)
 st.write(f"##### Train Score: {scores[0]}", unsafe_allow_html=True)
 st.write(f"##### Test Score: {scores[1]}", unsafe_allow_html=True)
 
