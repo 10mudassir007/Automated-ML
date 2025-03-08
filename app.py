@@ -253,8 +253,7 @@ if df.shape[1] < 2:
 
 st.write("Data:")
 st.write(df)
-unique_cols = {str(x):str(y) for x,y in zip(df[df.columns[-1]].unique(),range(len(df[df.columns[-1]].unique())))}
-st.write(unique_cols)
+
 with st.spinner("Processing Data"):
     df_processed,scalers,encoders,feature_pairs = process_df(df, df.columns[-1])
     st.success("Data Processed")
