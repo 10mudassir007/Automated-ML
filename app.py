@@ -292,5 +292,7 @@ if submitted:
     feature_pairs, encoders, scalers = load_processing_artifacts()
     processed_input = process_user_input(user_df, encoders, scalers, feature_pairs)
     st.write(processed_input)
+    st.write(processed_input.shape)
+    st.write(processed_input.to_numpy().flatten())
     #st.write(f"#### Predicted Value: {round(model.predict(processed_input.to_numpy().flatten()),2)}",unsafe_allow_html=True)
     
