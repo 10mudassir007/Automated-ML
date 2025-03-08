@@ -296,7 +296,9 @@ if submitted:
     st.write(processed_input.to_numpy().flatten())
     st.write(processed_input.to_numpy().flatten().shape)
     st.write(df.iloc[0])
-    st.write(model)
-    st.write(model.feature_names_)
+    st.write(df_processed.iloc[0])
+    st.write(df_processed.columns)
+    st.write(model.get_booster().feature_names)
+
     #st.write(f"#### Predicted Value: {round(model.predict(processed_input.to_numpy().flatten()),2)}",unsafe_allow_html=True)
     
