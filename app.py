@@ -293,22 +293,15 @@ if submitted:
     user_df = pd.DataFrame([user_input]) 
     feature_pairs, encoders, scalers = load_processing_artifacts()
     processed_input = process_user_input(user_df, encoders, scalers, feature_pairs)
-    st.write(processed_input)
-    st.write(processed_input.shape)
-    st.write(processed_input.to_numpy().flatten())
-    st.write(processed_input.to_numpy().flatten().shape)
-    st.write(df.iloc[0])
-    st.write(df_processed.iloc[0])
-    st.write(df_processed.columns)
-    st.write(model.get_booster().feature_names)
-    #st.write(model.predict(df_processed.iloc[0]))
+    
     prediction = model.predict(processed_input.to_numpy())
     target_col = df.columns[-1]
     is_classification = target_col in encoders
 
     if is_classification:
-        label_encoder = encoders[target_col]  # Get encoder for target
-        prediction = label_encoder.inverse_transform([int(prediction[0])])[0]  # Convert number to label
+        label_encoder = encoders[target_col] 
+        prediction = label_encoder.inverse_transform([int(prediction[0])])[0]
+        st.write("aa",prediction) 
     else:
         try:
             prediction = round(float(prediction[0]), 2)
