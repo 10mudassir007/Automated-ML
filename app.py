@@ -233,16 +233,84 @@ def process_user_input(user_df, encoders, scalers, feature_pairs):
     return user_df
 
 
-df = pd.read_csv("Ecommerce Customers")
+# df = pd.read_csv("Ecommerce Customers")
 
+# if "trained_model" not in st.session_state or "train_scores" not in st.session_state:
+#     with st.spinner("Processing Data"):
+#         df_processed,scalers,encoders,feature_pairs = process_df(df, df.columns[-1])
+#     st.success("Data Processed")
+#     with st.spinner("Training the model"):
+#         model, scores = training_s(df_processed, df.columns[-1])
+#     st.success("Model Trained ")
+
+#     st.session_state.trained_model = model
+#     st.session_state.train_scores = scores
+#     st.session_state.df_processed = df_processed
+# else:
+#     model = st.session_state.trained_model
+#     scores = st.session_state.train_scores
+#     df_processed = st.session_state.df_processed
+
+
+# st.write("Data:")
+# st.write(df)
+# st.write(f"##### Train Score: {scores[0]}", unsafe_allow_html=True)
+# st.write(f"##### Test Score: {scores[1]}", unsafe_allow_html=True)
+
+# if "feature_inputs" not in st.session_state:
+#     st.session_state.feature_inputs = {}
+
+# with st.form("input_form"):
+    
+#     for col in df_processed.columns:
+#         if col == df.columns[-1]:
+#             break
+#         st.session_state.feature_inputs[col] = st.text_input(
+#             f"Enter {col}",
+#             value=st.session_state.feature_inputs.get(col, "")
+#         )
+#     submitted = st.form_submit_button("Predict")
+
+# if submitted:
+#     user_input = {col: float(value) for col, value in st.session_state.feature_inputs.items()}
+#     user_df = pd.DataFrame([user_input]) 
+#     feature_pairs, encoders, scalers = load_processing_artifacts()
+#     processed_input = process_user_input(user_df, encoders, scalers, feature_pairs)
+#     st.write(f"#### Predicted Value: {round(model.predict(processed_input.to_numpy().flatten()),2)}",unsafe_allow_html=True)
+
+uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
+
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
+    st.session_state.df_uploaded = df  # Save to session state
+    st.success("Dataset uploaded successfully!")
+else:
+    st.warning("Please upload a CSV file to proceed.")
+    st.stop()  # Stop execution if no file is uploaded
+
+df = st.session_state.df_uploaded
+
+# Ensure the dataset has enough columns
+if df.shape[1] < 2:
+    st.error("Dataset must have at least one feature and a target column.")
+    st.stop()
+
+# Identify Target Column (Last Column Assumed)
+target_column = df.columns[-1]
+
+# Data Processing and Model Training
 if "trained_model" not in st.session_state or "train_scores" not in st.session_state:
     with st.spinner("Processing Data"):
-        df_processed,scalers,encoders,feature_pairs = process_df(df, df.columns[-1])
-    st.success("Data Processed")
-    with st.spinner("Training the model"):
-        model, scores = training_s(df_processed, df.columns[-1])
-    st.success("Model Trained ")
+        df_processed, scalers, encoders, feature_pairs = process_df(df, target_column)
+    
+    st.success("Data Processed ✅")
 
+    with st.spinner("Training the Model"):
+        model, scores = training_s(df_processed, target_column)
+
+    st.success("Model Trained ✅")
+
+    # Store in session state
     st.session_state.trained_model = model
     st.session_state.train_scores = scores
     st.session_state.df_processed = df_processed
@@ -251,29 +319,48 @@ else:
     scores = st.session_state.train_scores
     df_processed = st.session_state.df_processed
 
+# Display Data and Scores
+st.write("### Uploaded Data Preview:")
+st.write(df.head())
 
-st.write("Data:")
-st.write(df)
-st.write(f"##### Train Score: {scores[0]}", unsafe_allow_html=True)
-st.write(f"##### Test Score: {scores[1]}", unsafe_allow_html=True)
+st.write(f"##### Train Score: {scores[0]:.4f}", unsafe_allow_html=True)
+st.write(f"##### Test Score: {scores[1]:.4f}", unsafe_allow_html=True)
 
+# User Input Form
 if "feature_inputs" not in st.session_state:
     st.session_state.feature_inputs = {}
 
 with st.form("input_form"):
-    
     for col in df_processed.columns:
-        if col == df.columns[-1]:
-            break
-        st.session_state.feature_inputs[col] = st.text_input(
-            f"Enter {col}",
-            value=st.session_state.feature_inputs.get(col, "")
-        )
+        if col == target_column:
+            continue
+
+        if col in encoders:
+            # Categorical Columns (Dropdown)
+            unique_values = encoders[col].classes_.tolist()
+            st.session_state.feature_inputs[col] = st.selectbox(
+                f"Select {col}",
+                unique_values,
+                index=unique_values.index(st.session_state.feature_inputs.get(col, unique_values[0])) 
+                if st.session_state.feature_inputs.get(col) in unique_values else 0
+            )
+        else:
+            # Numerical Columns (Text Input)
+            st.session_state.feature_inputs[col] = st.text_input(
+                f"Enter {col}",
+                value=st.session_state.feature_inputs.get(col, "")
+            )
+
     submitted = st.form_submit_button("Predict")
 
+# Prediction
 if submitted:
     user_input = {col: float(value) for col, value in st.session_state.feature_inputs.items()}
     user_df = pd.DataFrame([user_input]) 
+
     feature_pairs, encoders, scalers = load_processing_artifacts()
     processed_input = process_user_input(user_df, encoders, scalers, feature_pairs)
-    st.write(f"#### Predicted Value: {round(model.predict(processed_input.to_numpy().flatten()),2)}",unsafe_allow_html=True)
+
+    prediction = model.predict(processed_input.to_numpy().flatten())
+
+    st.write(f"#### Predicted Value: {round(prediction[0], 2)}", unsafe_allow_html=True)
