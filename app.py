@@ -212,7 +212,7 @@ def process_user_input(user_df, encoders, scalers, feature_pairs):
     # Apply Encoding
     for col, encoder in encoders.items():
         if col in user_df:
-            user_df[col] = encoder.transform(user_df[col])
+            user_df[col] = user_df[col].apply(lambda x: encoder.transform([x])[0] if x in encoder.classes_ else -1)
 
     # Apply Scaling
     for col, scaler in scalers.items():
