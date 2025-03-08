@@ -230,7 +230,7 @@ def process_user_input(user_df, encoders, scalers, feature_pairs):
         # else:
         #     user_df[new_col_name] = 0  
 
-    return user_df
+    return user_df.to_numpy().flatten()
 
 
 df = pd.read_csv("Ecommerce Customers")
@@ -309,4 +309,4 @@ if submitted:
     processed_input = process_user_input(user_df, encoders, scalers, feature_pairs)
     st.write(processed_input)
     st.write(processed_input.shape)
-    st.write(processed_input.to_numpy().flatten())
+    st.write(model.predict(processed_input))
