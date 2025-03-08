@@ -243,7 +243,7 @@ else:
     st.warning("Please upload a CSV file to proceed.")
     st.stop()  # Stop execution if no file is uploaded
 
-df = st.session_state.df_uploaded
+df = st.session_state.df_uploaded[:1000]
 
 # Ensure the dataset has enough columns
 if df.shape[1] < 2:
@@ -251,7 +251,7 @@ if df.shape[1] < 2:
     st.stop()
 
 st.write("Data:")
-st.write(df)
+st.write(df[:1000])
 
 with st.spinner("Processing Data"):
     df_processed,scalers,encoders,feature_pairs = process_df(df, df.columns[-1])
