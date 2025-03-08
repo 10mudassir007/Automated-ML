@@ -266,9 +266,10 @@ df = pd.read_csv("Ecommerce Customers")
 if "trained_model" not in st.session_state or "train_scores" not in st.session_state:
     with st.spinner("Processing Data"):
         df_processed,scalers,encoders,feature_pairs = process_df(df, df.columns[-1])
-
+    st.success("Data Processed")
     with st.spinner("Training the model"):
         model, scores = training_s(df_processed, df.columns[-1])
+    st.success("Model Trained ")
 
     st.session_state.trained_model = model
     st.session_state.train_scores = scores
