@@ -153,6 +153,9 @@ def process_df(df, target=None):
     df = df.copy()
     df = remove_unique(df, target)
     df = handle_nulls(df)
+    if target and df[target].dtype == 'object':
+        encoders[target] = LabelEncoder()
+        df[target] = encoders[target].fit_transform(df[target])
     df, scalers = auto_scale(df, target)
     df, encoders = encode_or_drop(df, target)
     df, feature_pairs = feature_engineering(df, target_col=target)
