@@ -299,14 +299,14 @@ if submitted:
     is_classification = target_col in encoders
 
     if is_classification:
-        label_encoder = encoders[target_col] 
-        prediction = label_encoder.inverse_transform([int(prediction[0])])[0]
+        
         st.write("aa",prediction) 
     else:
         try:
-            prediction = round(float(prediction[0]), 2)
+            label_encoder = encoders[target_col] 
+            prediction = label_encoder.inverse_transform([int(prediction[0])])[0]
         except:
-            prediction = prediction
+            prediction = round(float(prediction[0]), 2)
 
     # Show prediction
     st.write(f"#### Predicted Value: {prediction}", unsafe_allow_html=True)
