@@ -251,7 +251,7 @@ if df.shape[1] < 2:
     st.stop()
 
 with st.spinner("Processing Data"):
-        df_processed,scalers,encoders,feature_pairs = process_df(df, df.columns[-1])
+    df_processed,scalers,encoders,feature_pairs = process_df(df, df.columns[-1])
     st.success("Data Processed")
 if "trained_model" not in st.session_state or "train_scores" not in st.session_state:
     
