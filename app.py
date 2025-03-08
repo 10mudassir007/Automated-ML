@@ -281,15 +281,34 @@ st.write(f"##### Test Score: {scores[1]}", unsafe_allow_html=True)
 if "feature_inputs" not in st.session_state:
     st.session_state.feature_inputs = {}
 
-with st.form("input_form"):
+# with st.form("input_form"):
     
+#     for col in df_processed.columns:
+#         if col == df.columns[-1]:
+#             break
+#         st.session_state.feature_inputs[col] = st.text_input(
+#             f"Enter {col}",
+#             value=st.session_state.feature_inputs.get(col, "")
+#         )
+#     submitted = st.form_submit_button("Predict")
+with st.form("input_form"):
     for col in df_processed.columns:
-        if col == df.columns[-1]:
+        if col == df.columns[-1]:  
             break
-        st.session_state.feature_inputs[col] = st.text_input(
-            f"Enter {col}",
-            value=st.session_state.feature_inputs.get(col, "")
-        )
+
+        if col in encoders:  
+            options = encoders[col].classes_.tolist()  
+            st.session_state.feature_inputs[col] = st.selectbox(
+                f"Select {col}",
+                options,
+                index=options.index(st.session_state.feature_inputs.get(col, options[0])) if st.session_state.feature_inputs.get(col) in options else 0
+            )
+        else:  
+            st.session_state.feature_inputs[col] = st.text_input(
+                f"Enter {col}",
+                value=st.session_state.feature_inputs.get(col, "")
+            )
+
     submitted = st.form_submit_button("Predict")
 
 if submitted:
