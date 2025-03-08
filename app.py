@@ -243,7 +243,7 @@ else:
     st.warning("Please upload a CSV file to proceed.")
     st.stop()  # Stop execution if no file is uploaded
 
-df = st.session_state.df_uploaded[:1000]
+df = st.session_state.df_uploaded[:200000]
 
 # Ensure the dataset has enough columns
 if df.shape[1] < 2:
