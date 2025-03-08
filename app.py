@@ -198,11 +198,12 @@ def load_processing_artifacts(artifacts_file="processing_artifacts.json", scaler
     with open(scalers_file, "rb") as f:
         scalers = pickle.load(f)
 
-    encoders = {
-        col: LabelEncoder().fit(classes)
-        for col, classes in artifacts["encoders"].items()
-    }
-
+    encoders = {}
+    for col, classes in artifacts["encoders"].items():
+        le = LabelEncoder()
+        le.classes_ = np.array(classes)  # Load previously fitted classes
+        encoders[col] = le
+        
     return artifacts["feature_pairs"], encoders, scalers
 
 def process_user_input(user_df, encoders, scalers, feature_pairs):
@@ -243,7 +244,7 @@ else:
     st.warning("Please upload a CSV file to proceed.")
     st.stop()  # Stop execution if no file is uploaded
 
-df = st.session_state.df_uploaded[:200000]
+df = st.session_state.df_uploaded[:250000]
 
 # Ensure the dataset has enough columns
 if df.shape[1] < 2:
