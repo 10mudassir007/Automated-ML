@@ -1,0 +1,8 @@
+# Environment variables
+.env
+
+# Pickle files
+*.pkl
+
+# Python cache
+__pycache__/
