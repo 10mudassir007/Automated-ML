@@ -1,1 +1,0 @@
-{"feature_pairs": [["Time on App", "Length of Membership"]], "encoders": {}, "scalers": ["Avg. Session Length", "Time on App", "Time on Website", "Length of Membership"]}
