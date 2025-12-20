@@ -14,3 +14,14 @@ enc.fit(X)
 from sklearn.preprocessing import LabelEncoder
 le = LabelEncoder()
 le.fit([1, 2, 2, 6])
+
+
+### REGRESSION METRICS
+pred = model.predict(X_val)  
+mse = mean_squared_error(y_val, pred)  
+mae = mean_absolute_error(y_val, pred)
+rmse = mean_squared_error(y_val, pred)**0.5
+
+do not use "squared" parameter
+
+print each and every appropiate metric such as for regression use MSE, MAE, RMSE and R2 Score. For classification, use accuracy_score, classification_report and confusion_matrix. Do not miss any.

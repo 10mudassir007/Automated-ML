@@ -1,13 +1,15 @@
 from langchain.agents import create_agent
 from dotenv import load_dotenv
 import os
-
-from helpers import structure_input, extract_code
+from src.helpers import structure_input, extract_code
+import io
+import contextlib
 
 load_dotenv()
+
 os.environ['GROQ_API_KEY'] = os.getenv("GROQ_API_KEY")
 
-with open("prompt.md", "r", encoding="utf-8") as f:
+with open(r"src\prompt.md", "r", encoding="utf-8") as f:
     prompt = f.read()
 
 agent = create_agent(
@@ -25,6 +27,11 @@ def run(path:str):
     code_only = extract_code(response['messages'][-1].content)
     print(code_only)    
     # Execute the code
-    exec(code_only, globals())
+    f = io.StringIO()
+    with contextlib.redirect_stdout(f):
+        exec(code_only, globals())
 
-run(r"F:\Files\Portfolio\AUTOML\automated-ml\diabetes_dataset.csv")
+    return f.getvalue()
+
+if __name__=="__main__":
+    run(r"F:\Files\Portfolio\AUTOML\automated-ml\diabetes_dataset.csv")

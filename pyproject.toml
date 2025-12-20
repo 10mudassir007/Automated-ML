@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "CortexML"
+version = "0.1.0"
+description = "Automated agent based ML pipeline"
+readme = "README.md"
+requires-python = ">=3.11"
+
+dependencies = [
+    "numpy",
+    "pandas",
+    "scikit-learn==1.7.0",
+    "xgboost",
+    "imbalanced-learn",
+    "tabulate",
+    "langchain",
+    "langchain[groq]",
+    "fastapi",
+    "uvicorn",
+    "python-dotenv",
+    "python-multipart"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]

@@ -9,7 +9,8 @@ def structure_input(path: str):
   
   with redirect_stdout(buffer):
         data.info()
-  if data.shape[1] > 1000:
+  
+  if data[data.columns[-1]].nunique() > 1000:
     task_type = "Regression"
   else:
     task_type = "Classification"
