@@ -34,4 +34,4 @@ def run(path:str):
     return f.getvalue()
 
 if __name__=="__main__":
-    run(r"F:\Files\Portfolio\AUTOML\automated-ml\diabetes_dataset.csv")
+    run("diabetes_dataset.csv")
