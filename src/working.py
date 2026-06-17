@@ -1,3 +1,4 @@
+from pathlib import Path
 from langchain.agents import create_agent
 from dotenv import load_dotenv
 import os
@@ -9,7 +10,11 @@ load_dotenv()
 
 os.environ['GROQ_API_KEY'] = os.getenv("GROQ_API_KEY")
 
-with open(r"src\prompt.md", "r", encoding="utf-8") as f:
+# Resolves the absolute path to prompt.md relative to this working.py file
+CURRENT_DIR = Path(__file__).resolve().parent
+PROMPT_PATH = CURRENT_DIR / "prompt.md"
+
+with open(PROMPT_PATH, "r", encoding="utf-8") as f:
     prompt = f.read()
 
 agent = create_agent(
@@ -17,7 +22,7 @@ agent = create_agent(
     system_prompt=prompt,
 )
 
-def run(path:str):
+def run(path: str):
     structured_input = structure_input(path)
     response = agent.invoke(
         {"messages": [{"role": "user", "content": structured_input}]},
@@ -33,5 +38,5 @@ def run(path:str):
 
     return f.getvalue()
 
-if __name__=="__main__":
+if __name__ == "__main__":
     run("diabetes_dataset.csv")
