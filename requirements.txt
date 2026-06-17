@@ -1,15 +1,15 @@
-numpy==2.4.2
-pandas==3.0.0
-scikit-learn==1.7.0
-xgboost==3.2.0
-imbalanced-learn==0.14.1
-tabulate==0.9.0
-langchain==1.2.10
-langchain[groq]==1.1.2
-fastapi[standard]==0.129.0
-uvicorn==0.40.0
-python-dotenv==1.2.1
-python-multipart==0.0.22
+numpy
+pandas
+scikit-learn
+xgboost
+imbalanced-learn
+tabulate
+langchain
+langchain[groq]
+fastapi[standard]
+uvicorn
+python-dotenv
+python-multipart
 
 
 
